@@ -1,0 +1,107 @@
+---
+alwaysApply: true
+---
+
+# Command Structure & Output Standards
+
+## Output Phases
+
+All commands should have clear output for 4 phases:
+
+### 1. Starting Phase
+```python
+self.stdout.write("✨ Creating default items...")
+```
+
+### 2. Success Phase
+```python
+self.stdout.write(
+    self.style.SUCCESS("✅ Default items successfully created.")
+)
+```
+
+### 3. Skip Phase (No Changes Needed)
+```python
+self.stdout.write("⏭️ Skipping. Defaults already exist.")
+```
+
+### 4. Error Phase
+```python
+self.stdout.write(
+    self.style.ERROR(f"⛔️ Error creating items: {e}")
+)
+```
+
+## Required Structure
+
+- All commands **must** be wrapped in try/except
+- Use logging for exception details
+- Return early after handling each case
+
+## Command Template
+
+```python
+import logging
+
+from django.core.management.base import BaseCommand
+from django.db.utils import IntegrityError
+
+logger = logging.getLogger(__name__)
+
+
+class Command(BaseCommand):
+    """
+    Brief description of what this command does.
+    """
+
+    help = "Brief description of what this command does."
+
+    def add_arguments(self, parser):
+        """
+        Add command arguments (optional).
+        """
+        # parser.add_argument('--dry-run', action='store_true', help='Run without making changes')
+        pass
+
+    def handle(self, *args, **options):
+        """
+        Main command handler.
+        """
+        try:
+            # Phase 1: Starting
+            self.stdout.write("✨ Creating default items...")
+
+            # Execute main logic
+            result, created = some_service_function()
+
+            if created:
+                # Phase 2: Success
+                self.stdout.write(
+                    self.style.SUCCESS("✅ Default items successfully created.")
+                )
+            else:
+                # Phase 3: Skip
+                self.stdout.write("⏭️ Skipping. Defaults already exist.")
+            return
+
+        except IntegrityError:
+            # Handle specific exceptions gracefully
+            self.stdout.write("⏭️ Skipping. Defaults already exist.")
+            return
+
+        except Exception as e:
+            # Phase 4: Error
+            self.stdout.write(
+                self.style.ERROR(f"⛔️ Error creating items: {e}")
+            )
+            logger.exception("Create default items failed.")
+```
+
+## Emoji Reference
+
+| Phase | Emoji | Usage |
+|-------|-------|-------|
+| Starting | ✨ | Beginning of command execution |
+| Success | ✅ | Operation completed successfully |
+| Skip | ⏭️ | No changes needed |
+| Error | ⛔️ | Operation failed |
