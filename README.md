@@ -1,0 +1,1 @@
+# cursor-shared-django-rules
