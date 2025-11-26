@@ -9,11 +9,13 @@ alwaysApply: true
 All commands should have clear output for 4 phases:
 
 ### 1. Starting Phase
+
 ```python
 self.stdout.write("✨ Creating default items...")
 ```
 
 ### 2. Success Phase
+
 ```python
 self.stdout.write(
     self.style.SUCCESS("✅ Default items successfully created.")
@@ -21,14 +23,16 @@ self.stdout.write(
 ```
 
 ### 3. Skip Phase (No Changes Needed)
+
 ```python
 self.stdout.write("⏭️ Skipping. Defaults already exist.")
 ```
 
 ### 4. Error Phase
+
 ```python
 self.stdout.write(
-    self.style.ERROR(f"⛔️ Error creating items: {e}")
+    self.style.ERROR(f"❌ Error creating items: {e}")
 )
 ```
 
@@ -92,16 +96,16 @@ class Command(BaseCommand):
         except Exception as e:
             # Phase 4: Error
             self.stdout.write(
-                self.style.ERROR(f"⛔️ Error creating items: {e}")
+                self.style.ERROR(f"❌ Error creating items: {e}")
             )
             logger.exception("Create default items failed.")
 ```
 
 ## Emoji Reference
 
-| Phase | Emoji | Usage |
-|-------|-------|-------|
-| Starting | ✨ | Beginning of command execution |
-| Success | ✅ | Operation completed successfully |
-| Skip | ⏭️ | No changes needed |
-| Error | ⛔️ | Operation failed |
+| Phase    | Emoji | Usage                            |
+| -------- | ----- | -------------------------------- |
+| Starting | ✨    | Beginning of command execution   |
+| Success  | ✅    | Operation completed successfully |
+| Skip     | ⏭️    | No changes needed                |
+| Error    | ❌    | Operation failed                 |
