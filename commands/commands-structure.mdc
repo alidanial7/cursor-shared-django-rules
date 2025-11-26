@@ -41,6 +41,58 @@ self.stdout.write(
 - All commands **must** be wrapped in try/except
 - Use logging for exception details
 - Return early after handling each case
+- **Write clear comments** for each logical section of the command
+
+## Comments Guidelines
+
+Comments are **mandatory** in commands. They help with:
+
+- Understanding command flow at a glance
+- Identifying phases during code review
+- Maintaining consistency across commands
+
+### Required Comments
+
+```python
+def handle(self, *args, **options):
+    """
+    Main command handler.
+    """
+    try:
+        # Phase 1: Starting
+        self.stdout.write("✨ Starting process...")
+
+        # Fetch required data
+        items = get_items()
+
+        # Validate prerequisites
+        if not items:
+            self.stdout.write("⏭️ Skipping. No items to process.")
+            return
+
+        # Process each item
+        for item in items:
+            process_item(item)
+
+        # Phase 2: Success
+        self.stdout.write(self.style.SUCCESS("✅ Process completed."))
+
+    except SpecificException:
+        # Phase 3: Skip (expected condition)
+        self.stdout.write("⏭️ Skipping. Already processed.")
+
+    except Exception as e:
+        # Phase 4: Error
+        self.stdout.write(self.style.ERROR(f"❌ Error: {e}"))
+        logger.exception("Process failed.")
+```
+
+### Comment Best Practices
+
+- Comment **what** the code does, not **how**
+- Mark each phase clearly (`# Phase 1: Starting`)
+- Describe business logic sections (`# Validate prerequisites`)
+- Keep comments concise but descriptive
 
 ## Command Template
 
