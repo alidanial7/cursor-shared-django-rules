@@ -1,0 +1,55 @@
+---
+alwaysApply: true
+---
+
+# Python Function Calls
+
+## Named Arguments Required
+
+**Always specify argument names when calling functions** to improve code readability, reduce errors, and make code self-documenting.
+
+### ✅ Correct Usage
+
+```python
+# Function definition
+def create_user(email: str, username: str, is_active: bool = True, send_email: bool = False):
+    """Create a new user."""
+    pass
+
+# Function call with named arguments
+user = create_user(
+    email="user@example.com",
+    username="johndoe",
+    is_active=True,
+    send_email=True
+)
+
+# Even for single argument calls
+result = process_data(data=my_data)
+```
+
+### ❌ Incorrect Usage
+
+```python
+# Positional arguments - harder to read
+user = create_user("user@example.com", "johndoe", True, True)
+
+# Unclear what each argument represents
+result = process_data(my_data)
+```
+
+### Exceptions
+
+Named arguments are not required for:
+
+- Standard library functions with obvious parameters: `len(items)`, `str(value)`
+- Common Django/DRF patterns: `User.objects.get(id=1)`
+- Mathematical operations: `max(a, b, c)`
+- Built-in functions where context is clear: `print(message)`
+
+### Best Practices
+
+- Use named arguments for functions with 2+ parameters
+- Always use named arguments for boolean flags
+- Use named arguments when calling functions with default parameters you want to override
+- Prefer named arguments for better code maintainability

@@ -1,0 +1,47 @@
+---
+alwaysApply: true
+---
+
+# Python Coding Standards
+
+## General Guidelines
+
+Follow PEP 8 style guide and Django best practices for Python code.
+
+## Code Style
+
+- Maximum line length: 88 characters (Black formatter default)
+- Use snake_case for functions and variables
+- Use PascalCase for class names
+- Use UPPER_CASE for constants
+
+## Imports
+
+- Group imports: standard library, third-party, local
+- Use absolute imports
+- Sort imports alphabetically within groups
+
+```python
+# Standard library
+import os
+from datetime import datetime
+
+# Third-party
+from django.db import models
+from rest_framework import serializers
+
+# Local
+from myapp.models import User
+from myapp.services import user_service
+```
+
+## Type Hints
+
+- Use type hints for function parameters and return values
+- Prefer type hints for better IDE support and documentation
+
+```python
+def calculate_total(items: list[dict], discount: float = 0.0) -> float:
+    """Calculate total with optional discount."""
+    pass
+```

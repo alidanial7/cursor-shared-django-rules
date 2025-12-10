@@ -1,0 +1,52 @@
+---
+alwaysApply: true
+---
+
+# Django Serializers
+
+## Required: help_text
+
+**All serializer fields must include `help_text`** to provide clear documentation and improve API documentation (DRF browsable API, OpenAPI schemas, etc.).
+
+### ✅ Correct Usage
+
+```python
+from rest_framework import serializers
+
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        help_text="User's email address. Must be unique and valid."
+    )
+    username = serializers.CharField(
+        max_length=150,
+        help_text="Unique username for the user. 3-150 characters."
+    )
+    is_active = serializers.BooleanField(
+        default=True,
+        help_text="Whether the user account is active."
+    )
+    created_at = serializers.DateTimeField(
+        read_only=True,
+        help_text="Timestamp when the user account was created."
+    )
+
+    class Meta:
+        model = User
+        fields = ['email', 'username', 'is_active', 'created_at']
+```
+
+### ❌ Incorrect Usage
+
+```python
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()  # Missing help_text
+    username = serializers.CharField(max_length=150)  # Missing help_text
+```
+
+### Best Practices
+
+- Write clear, concise help text that explains the field's purpose
+- Include validation rules in help_text when relevant
+- For read-only fields, mention they are automatically set
+- For required fields, explicitly state they are required
+- Use consistent formatting across similar fields
