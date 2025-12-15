@@ -1,6 +1,6 @@
 # AI Django Rules
 
-A collection of coding style guidelines and best practices tailored specifically for Cursor to follow when generating and reviewing Django code. This repository contains markdown documentation files (`.md` and `.mdc`) that provide context and rules for maintaining consistent code style across Django development projects.
+A collection of coding style guidelines and best practices tailored specifically for Cursor to follow when generating and reviewing Django code. This repository contains markdown documentation files (`.md`) that provide context and rules for maintaining consistent code style across Django development projects.
 
 ## Overview
 
@@ -13,21 +13,29 @@ This project serves as a centralized style guide that Cursor can reference to:
 
 ## Structure
 
-The repository contains markdown files (`.md` and `.mdc`) organized by Django topics:
+The repository contains markdown files (`.md`) organized by Django topics:
 
 ### Commands (`commands/`)
 
-- **`commands-base.mdc`** - Overview of Django management commands, command types (project-scoped vs app-scoped), base classes, and best practices
-- **`commands-structure.mdc`** - Command structure standards, output phases (starting, success, skip, error), required try/except blocks, and comment guidelines
-- **`commands-example.mdc`** - Minimal command template with examples
+- **`commands-base.md`** - Overview of Django management commands, command types (project-scoped vs app-scoped), base classes, and best practices
+- **`commands-structure.md`** - Command structure standards, output phases (starting, success, skip, error), required try/except blocks, and comment guidelines
+- **`commands-example.md`** - Minimal command template with examples
 
 ### Serializers (`serializers/`)
 
-- **`serializers-base.mdc`** - Serializer field requirements, `help_text` guidelines, and best practices
+- **`serializers-base.md`** - Selector patterns, query functions, and data access best practices
+
+### APIs (`apis/`)
+
+- **`apis/views/api-views-base.md`** - API view naming conventions and best practices
+
+### URLs (`urls/`)
+
+- **`urls/urls-base.md`** - URL routing patterns and best practices
 
 ## File Format
 
-Files use the `.mdc` extension (Markdown with Cursor context) and include frontmatter:
+Files use the standard `.md` extension (Markdown) and include frontmatter for Cursor context:
 
 ```yaml
 ---
@@ -36,6 +44,7 @@ alwaysApply: true
 ```
 
 - **`alwaysApply: true`** - Ensures Cursor always references these rules when generating code
+- **`.md` extension** - Standard markdown format that renders properly on GitHub, GitLab, and in all code editors
 - Files are organized by topic in directories
 - Each file focuses on a specific aspect of Django development
 
@@ -46,7 +55,7 @@ Configure Cursor to reference these files so it understands your coding preferen
 ### Setting Up in Cursor
 
 1. Add this repository to your Cursor workspace or reference it in your project settings
-2. Cursor will automatically read `.mdc` files with `alwaysApply: true`
+2. Cursor will automatically read `.md` files with `alwaysApply: true` frontmatter
 3. The AI will follow these guidelines when generating Django code
 
 ## Contributing
@@ -57,7 +66,7 @@ We welcome contributions to improve and expand these coding standards. Here's ho
 
 1. **Choose the right directory** - Create or use existing directories organized by topic (e.g., `models/`, `views/`, `tests/`)
 
-2. **Create `.mdc` files** - Use the `.mdc` extension for files that should always be applied:
+2. **Create `.md` files** - Use the standard `.md` extension with frontmatter for files that should always be applied:
 
    ```yaml
    ---
@@ -96,12 +105,12 @@ We welcome contributions to improve and expand these coding standards. Here's ho
 
 ### File Naming Convention
 
-- Use descriptive names: `commands-base.mdc`, `serializers-base.mdc`
+- Use descriptive names: `commands-base.md`, `serializers-base.md`
 - Use kebab-case for file names
 - Group related files in directories
-- Use `-base.mdc` for foundational rules
-- Use `-structure.mdc` for structural guidelines
-- Use `-example.mdc` for template examples
+- Use `-base.md` for foundational rules
+- Use `-structure.md` for structural guidelines
+- Use `-example.md` for template examples
 
 ### Example Contribution
 
