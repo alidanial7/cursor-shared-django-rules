@@ -2,51 +2,183 @@
 alwaysApply: true
 ---
 
-# Django Serializers
+# Django Selectors
 
-## Required: help_text
+This document defines best practices for **selectors** in Django projects.  
+Selectors follow **single responsibility principle**: they only query data, no business logic.
 
-**All serializer fields must include `help_text`** to provide clear documentation and improve API documentation (DRF browsable API, OpenAPI schemas, etc.).
+> Example uses `User`, but pattern applies to any model.
 
-### ✅ Correct Usage
+---
+
+## Core Concept
+
+A **selector**:
+
+- ✅ Reads data from the database only
+- ✅ Uses ORM queries (`filter`, `get`, `annotate`, `Q`, etc.)
+- ✅ Defines **cardinality** (many / one / optional)
+- ❌ Does not contain business logic
+- ❌ Does not perform validation or permissions
+- ❌ Does not modify data
+
+> **Comment:** Separates **data access** from **business logic**. Services handle rules, validations, and permissions.
+
+---
+
+## Cardinality & Return Types
+
+| Function           | Cardinality | Return Type       | Behavior                                           | Comment                                              |
+| ------------------ | ----------- | ----------------- | -------------------------------------------------- | ---------------------------------------------------- |
+| `get_items`        | Many        | `QuerySet[Model]` | Returns multiple objects (can be empty)            | Use when multiple results are possible               |
+| `get_item`         | One         | `Model`           | Raises `DoesNotExist` or `MultipleObjectsReturned` | Use when exactly one object is expected              |
+| `get_item_or_none` | Zero or One | `Model` or `None` | Returns a single object or `None`                  | Use when object may not exist; caller handles `None` |
+
+**Comment:** Cardinality drives **return type**, **exception handling**, and **selector naming**.
+
+---
+
+## Why Use `Q` Objects
+
+`Q` objects allow:
+
+- Flexible combination of conditions (AND / OR)
+- Handling optional filter parameters easily
+- Cleaner and more maintainable code
+- Easy future extension
 
 ```python
-from rest_framework import serializers
+from django.db.models import Q
 
-class UserSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(
-        help_text="User's email address. Must be unique and valid."
-    )
-    username = serializers.CharField(
-        max_length=150,
-        help_text="Unique username for the user. 3-150 characters."
-    )
-    is_active = serializers.BooleanField(
-        default=True,
-        help_text="Whether the user account is active."
-    )
-    created_at = serializers.DateTimeField(
-        read_only=True,
-        help_text="Timestamp when the user account was created."
-    )
+q = Q()
+if name is not None:
+    q &= Q(name=name)
+if id is not None:
+    q &= Q(id=id)
 
-    class Meta:
-        model = User
-        fields = ['email', 'username', 'is_active', 'created_at']
+qs = Model.objects.filter(q)
 ```
 
-### ❌ Incorrect Usage
+**Comment:** `Q` objects are especially useful for selectors with multiple optional parameters.
+
+## Prefetch Related Fields
+
+Use \_prefetch_related(queryset, related_name) to prefetch related objects efficiently.
 
 ```python
-class UserSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField()  # Missing help_text
-    username = serializers.CharField(max_length=150)  # Missing help_text
+from django.db.models import Prefetch
+
+def _prefetch_related(queryset, related_name, exclude=None):
+    """
+    Prefetch a related field with optional exclusion.
+
+    Comment: Improves query efficiency by avoiding N+1 queries.
+    """
+    prefetch_qs = queryset.model._meta.get_field(related_name).related_model.objects.all()
+    if exclude:
+        prefetch_qs = prefetch_qs.exclude(**exclude)
+    return queryset.prefetch_related(Prefetch(related_name, queryset=prefetch_qs))
 ```
 
-### Best Practices
+**Comment:** Keep selectors flexible by prefetching only when needed.
 
-- Write clear, concise help text that explains the field's purpose
-- Include validation rules in help_text when relevant
-- For read-only fields, mention they are automatically set
-- For required fields, explicitly state they are required
-- Use consistent formatting across similar fields
+## Internal Helper: `_build_queryset`
+
+```python
+def _build_queryset(
+    model,
+    *,
+    filters: dict = None,
+    with_related: dict | None = None
+) -> QuerySet:
+    """
+    Build a reusable queryset based on optional filters and prefetch related fields.
+
+    Comment: Centralizes all filter and prefetch logic to avoid repetition.
+    """
+    filters = filters or {}
+    qs = model.objects.filter(**filters)
+
+    if with_related:
+        for related_name, exclude in with_related.items():
+            qs = _prefetch_related(qs, related_name, exclude)
+
+    return qs
+```
+
+## Public Selectors (Generalized)
+
+1. get_items
+
+```python
+def get_items(model, *, filters=None, with_related=None) -> QuerySet:
+    """
+    Retrieve multiple objects based on optional filters.
+
+    Comment: Always returns QuerySet, never raises exceptions. Can return empty.
+    """
+    return _build_queryset(model, filters=filters, with_related=with_related)
+```
+
+Cardinality: Many
+
+2. get_item
+
+```python
+def get_item(model, *, filters=None, with_related=None):
+    """
+    Retrieve exactly one object. Raises ORM exceptions if not found or duplicated.
+
+    Comment: Use only when exactly one object is expected.
+    """
+    qs = _build_queryset(model, filters=filters, with_related=with_related)
+    return qs.get()
+```
+
+Cardinality: One
+
+3. get_item_or_none
+
+```python
+def get_item_or_none(model, *, filters=None, with_related=None):
+    """
+    Retrieve a single object if exists, otherwise returns None.
+
+    Comment: Always returns safely, never raises exceptions.
+    """
+    qs = _build_queryset(model, filters=filters, with_related=with_related)
+    return qs.first()
+```
+
+Cardinality: Zero or One
+
+## Anti-Patterns (Forbidden)
+
+Putting business logic inside selectors
+
+Catching ORM exceptions inside selector
+
+Writing to database inside selector
+
+```python
+# ❌ Forbidden
+def get_items_with_check(model, filters):
+    qs = model.objects.filter(**filters)
+    if not qs.exists():
+        raise ValidationError("No objects")
+    return qs
+```
+
+## Summary
+
+Only three public selectors: `get_items`, `get_item`, `get_item_or_none`
+
+`_build_queryset` centralizes filter and prefetch logic
+
+`Q` objects enable flexible and maintainable filtering
+
+Cardinality drives return type and exception handling
+
+Service layer handles business rules, validations, and permissions
+
+**Comment:** Pattern is fully generic and can be applied to any Django model, not just User.
