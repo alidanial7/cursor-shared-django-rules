@@ -21,9 +21,13 @@ The repository contains markdown files (`.md`) organized by Django topics:
 - **`commands-structure.md`** - Command structure standards, output phases (starting, success, skip, error), required try/except blocks, and comment guidelines
 - **`commands-example.md`** - Minimal command template with examples
 
+### Selectors (`selectors/`)
+
+- **`selectors-base.md`** - Selector patterns, query functions, and data access best practices
+
 ### Serializers (`serializers/`)
 
-- **`serializers-base.md`** - Selector patterns, query functions, and data access best practices
+- **`serializers-base.md`** - DRF serializer patterns, validation, and data transformation best practices
 
 ### APIs (`apis/`)
 
